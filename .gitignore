@@ -1,0 +1,12 @@
+.gradle
+/local.properties
+/.idea/workspace.xml
+/.idea/libraries
+.DS_Store
+/build
+/captures
+/.externalNativeBuild
+cocos2d/cocos/platform/android/libcocos2dx/build/
+proj.android-studio/build/
+proj.android-studio/.idea/
+proj.android-studio/local.properties
