@@ -46,9 +46,11 @@ bool HelloWorld::init()
     }
     else
     {
-        float x = origin.x + visibleSize.width - closeItem->getContentSize().width/2;
-        float y = origin.y + closeItem->getContentSize().height/2;
+        float x = origin.x + visibleSize.width - closeItem->getContentSize().width;
+        float y = origin.y + closeItem->getContentSize().height;
         closeItem->setPosition(Vec2(x,y));
+        closeItem->setScale(2.0);
+        CCLOG ("sxsexe_log origin.x=%f, origin.y=%f,  x=%f, y=%f, visibleSize.width=%f \n",origin.x, origin.y, x, y, visibleSize.width);
     }
 
     // create menu, it's an autorelease object
@@ -98,6 +100,7 @@ bool HelloWorld::init()
 void HelloWorld::menuCloseCallback(Ref* pSender)
 {
     //Close the cocos2d-x game scene and quit the application
+    CCLOG ("sxsexe_log  menuCloseCallback \n");
     Director::getInstance()->end();
 
     #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)

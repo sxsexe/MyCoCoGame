@@ -46,14 +46,13 @@ import org.cocos2dx.lib.Cocos2dxHelper.Cocos2dxHelperListener;
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLDisplay;
-import javax.microedition.khronos.egl.EGLContext;
 
 public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelperListener {
     // ===========================================================
     // Constants
     // ===========================================================
 
-    private final static String TAG = Cocos2dxActivity.class.getSimpleName();
+    private final static String TAG = "Cocos2dxActivity_TAG";
 
     // ===========================================================
     // Fields
@@ -110,15 +109,20 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        Log.d(TAG, "sxsexe_log, onCreate this.mGLSurfaceView = " + this.mGLSurfaceView);
+
         // Workaround in https://stackoverflow.com/questions/16283079/re-launch-of-activity-on-home-button-but-only-the-first-time/16447508
-        if (!isTaskRoot()) {
-            // Android launched another instance of the root activity into an existing task
-            //  so just quietly finish and go away, dropping the user back into the activity
-            //  at the top of the stack (ie: the last state of this task)
-            finish();
-            Log.w(TAG, "[Workaround] Ignore the activity started from icon!");
-            return;
-        }
+//        if (!isTaskRoot()) {
+//
+//            Log.d(TAG, "sxsexe_log, onCreate  not TaskRoot");
+//
+//            // Android launched another instance of the root activity into an existing task
+//            //  so just quietly finish and go away, dropping the user back into the activity
+//            //  at the top of the stack (ie: the last state of this task)
+//            finish();
+//            Log.w(TAG, "[Workaround] Ignore the activity started from icon!");
+//            return;
+//        }
 
         this.hideVirtualButton();
 
@@ -126,7 +130,8 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
 
         sContext = this;
         this.mHandler = new Cocos2dxHandler(this);
-        
+
+        Log.d(TAG, "sxsexe_log, onCreate Cocos2dxHelper.init " + this);
         Cocos2dxHelper.init(this);
         
         this.mGLContextAttrs = getGLContextAttrs();
@@ -211,6 +216,13 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
     }
 
     @Override
+    public void onBackPressed() {
+        Log.d(TAG, "sxsexe_log, onBackPressed");
+        finish();
+        super.onBackPressed();
+    }
+
+    @Override
     public void showDialog(final String pTitle, final String pMessage) {
         Message msg = new Message();
         msg.what = Cocos2dxHandler.HANDLER_SHOW_DIALOG;
@@ -220,6 +232,7 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
     
     @Override
     public void runOnGLThread(final Runnable pRunnable) {
+        Log.d(TAG, "sxsexe_log, runOnGLThread this = " + this);
         this.mGLSurfaceView.queueEvent(pRunnable);
     }
     
@@ -259,8 +272,10 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
 
         mFrameLayout.addView(edittext);
 
+
         // Cocos2dxGLSurfaceView
         this.mGLSurfaceView = this.onCreateView();
+        Log.d(TAG, "sxsexe_log, init this.mGLSurfaceView = " + this.mGLSurfaceView);
 
         // ...add to FrameLayout
         mFrameLayout.addView(this.mGLSurfaceView);
