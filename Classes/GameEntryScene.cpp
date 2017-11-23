@@ -46,7 +46,12 @@ bool GameEntryScene::init()
     addChild(menu);
     float x = origin.x + visibleSize.width / 2;
     float y = origin.y + visibleSize.height - menuItemFlappyBird->getContentSize().height;
-    menu->setPosition(Point(x, y));
+    menu->setPosition(Point(x, 0));
+
+    // menu进入动画
+    auto moveBy = MoveBy::create(2.0f, Vec2(0, y));
+    auto pBounceInOut = EaseBounceInOut::create(moveBy);
+    menu->runAction(pBounceInOut);
 
 
     return true;
