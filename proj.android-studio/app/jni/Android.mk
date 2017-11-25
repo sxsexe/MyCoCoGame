@@ -13,7 +13,9 @@ LOCAL_MODULE_FILENAME := libMyGame
 
 LOCAL_SRC_FILES := $(LOCAL_PATH)/hellocpp/main.cpp \
                    $(LOCAL_PATH)/../../../Classes/AppDelegate.cpp \
-                   $(LOCAL_PATH)/../../../Classes/GameEntryScene.cpp
+                   $(LOCAL_PATH)/../../../Classes/GameEntryScene.cpp \
+                   $(LOCAL_PATH)/../../../Classes/flappybird/FlappyBirdMainScene.cpp \
+                   $(LOCAL_PATH)/../../../Classes/flappybird/GameLayer.cpp
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../../Classes
 

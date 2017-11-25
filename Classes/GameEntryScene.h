@@ -2,6 +2,7 @@
 #define __GAME_ENTRY_SCENE_H__
 
 #include "cocos2d.h"
+#include "flappybird/FlappyBirdMainScene.h"
 
 USING_NS_CC;
 
@@ -15,8 +16,11 @@ public:
     // implement the "static create()" method manually
     CREATE_FUNC(GameEntryScene);
 
+    // all kinds of scene
+    Scene * mFpMainScene;
 
-    void gotoFlappyBird(Ref* pSender);
+
+    void gotoFlappyBirdScene(Ref *pSender);
 };
 
 #endif // __GAME_ENTRY_SCENE_H__

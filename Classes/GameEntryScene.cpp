@@ -41,7 +41,8 @@ bool GameEntryScene::init()
     // Flappy Bird
     MenuItemFont::setFontName("Consolas");
     MenuItemFont::setFontSize(MENU_ITEM_FONT_SIZE);
-    auto menuItemFlappyBird = MenuItemFont::create("Flappy Bird", CC_CALLBACK_1(GameEntryScene::gotoFlappyBird, this));
+    auto menuItemFlappyBird = MenuItemFont::create("Flappy Bird", CC_CALLBACK_1(
+            GameEntryScene::gotoFlappyBirdScene, this));
     auto menu = Menu::create(menuItemFlappyBird, NULL);
     addChild(menu);
     float x = origin.x + visibleSize.width / 2;
@@ -57,6 +58,12 @@ bool GameEntryScene::init()
     return true;
 }
 
-void GameEntryScene::gotoFlappyBird(Ref* pSender) {
-    CCLOG("%s : gotoFlappyBird ", LOG_ATG);
+void GameEntryScene::gotoFlappyBirdScene(Ref *pSender) {
+    CCLOG("%s : gotoFlappyBirdScene ", LOG_ATG);
+
+    Director::getInstance()->setDepthTest(true);
+    mFpMainScene = FlappyBirdMainScene::createScene();
+
+    auto ss = TransitionFade::create(1, mFpMainScene);
+    Director::getInstance()->replaceScene(ss);
 }
