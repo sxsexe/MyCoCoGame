@@ -6,22 +6,39 @@
 #define PROJ_ANDROID_STUDIO_GAMELAYER_H
 
 #include "cocos2d.h"
+#include "ui/CocosGUI.h"
 
 USING_NS_CC;
+using namespace ui;
 
 class GameLayer : public Layer
 {
 public:
     // 小鸟精灵
-    Sprite * mBird;
+    Sprite* mBird;
     // 动画动作数组
     Animate* animAc;
 
-    //声明背景精灵
-    Sprite *mBackground;
+    // 背景精灵
+    Sprite* mBackground;
+    // floor精灵
+    Sprite* mFloor;
+    // 柱子精灵
+    Scale9Sprite* mColumnUnder1;
+    Scale9Sprite* mColumnUnder2;
+    Scale9Sprite* mColumnOn1;
+    Scale9Sprite* mColumnOn2;
+
 
 private:
     Sprite* initBird();
+    Sprite* initFloor();
+
+    void initColumn1();
+    void initColumn2();
+
+    int random();
+
 
 public:
     // 初始化GameLayer

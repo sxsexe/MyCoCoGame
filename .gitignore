@@ -10,3 +10,4 @@ cocos2d/cocos/platform/android/libcocos2dx/build/
 proj.android-studio/build/
 proj.android-studio/.idea/
 proj.android-studio/local.properties
+log/

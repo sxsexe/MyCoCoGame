@@ -59,11 +59,12 @@ bool GameEntryScene::init()
 }
 
 void GameEntryScene::gotoFlappyBirdScene(Ref *pSender) {
-    CCLOG("%s : gotoFlappyBirdScene ", LOG_ATG);
+    CCLOG("%s : gotoFlappyBirdScene ++", LOG_ATG);
 
     Director::getInstance()->setDepthTest(true);
     mFpMainScene = FlappyBirdMainScene::createScene();
-
     auto ss = TransitionFade::create(1, mFpMainScene);
     Director::getInstance()->replaceScene(ss);
+
+    CCLOG("%s : gotoFlappyBirdScene --", LOG_ATG);
 }
