@@ -38,10 +38,17 @@ private:
     void initColumn2();
 
     int random();
+    int randomColumn(int min = COLUMN_MIN_H, int max = COLUMN_MAX_H);
+
+    bool onTouchBegan(Touch* touch, Event* event);
 
 private:
-    const int COLUMN_WIDTH = 96;
-    const int COLUMN_GAP = 80;
+    const int COLUMN_WIDTH = 24;
+    const int COLUMN_GAP = 60;
+    static const int COLUMN_MIN_H = 60;
+    static const int COLUMN_MAX_H = 200;
+    const int COLUMN_SPACING = 120;
+    const float COLUMN_SPEED = 0.8;
 
 public:
     // 初始化GameLayer
