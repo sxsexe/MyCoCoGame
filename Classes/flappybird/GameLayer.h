@@ -39,6 +39,9 @@ private:
 
     int random();
 
+private:
+    const int COLUMN_WIDTH = 96;
+    const int COLUMN_GAP = 80;
 
 public:
     // 初始化GameLayer

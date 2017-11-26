@@ -3,6 +3,7 @@
 
 #include "cocos2d.h"
 #include "flappybird/FlappyBirdMainScene.h"
+#include "ui/CocosGUI.h"
 
 USING_NS_CC;
 
@@ -21,6 +22,8 @@ public:
 
 
     void gotoFlappyBirdScene(Ref *pSender);
+
+    void test();
 };
 
 #endif // __GAME_ENTRY_SCENE_H__

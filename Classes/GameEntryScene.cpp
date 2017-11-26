@@ -50,10 +50,13 @@ bool GameEntryScene::init()
     menu->setPosition(Point(x, 0));
 
     // menu进入动画
-    auto moveBy = MoveBy::create(2.0f, Vec2(0, y));
-    auto pBounceInOut = EaseBounceInOut::create(moveBy);
+    auto moveBy = MoveBy::create(0.5f, Vec2(0, y));
+    auto pBounceInOut = EaseBounceIn::create(moveBy);
     menu->runAction(pBounceInOut);
 
+
+    //test
+    test();
 
     return true;
 }
@@ -67,4 +70,24 @@ void GameEntryScene::gotoFlappyBirdScene(Ref *pSender) {
     Director::getInstance()->replaceScene(ss);
 
     CCLOG("%s : gotoFlappyBirdScene --", LOG_ATG);
+}
+
+
+void GameEntryScene::test() {
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
+    int a = 2;
+    Sprite* sprite = Sprite::create("fp/column2.png");
+    Size sSize = sprite->getContentSize();
+    Scale9Sprite* s9s1 = Scale9Sprite::create();
+    s9s1->updateWithSprite(sprite, Rect(0, 0, sSize.width, sSize.height),
+                           false, Rect(a, a, sSize.width-a*2, sSize.height-a*2));
+
+    s9s1->setPosition(Vec2(origin.x + 100, origin.y + 100));
+    s9s1->setContentSize(Size(sSize.width, sSize.height*3));
+    s9s1->setColor(Color3B(128, 0, 0));
+
+    this->addChild(s9s1);
+
 }
