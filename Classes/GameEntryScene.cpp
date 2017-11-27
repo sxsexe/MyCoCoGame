@@ -56,7 +56,7 @@ bool GameEntryScene::init()
 
 
     //test
-    test();
+//    test();
 
     return true;
 }
@@ -66,7 +66,7 @@ void GameEntryScene::gotoFlappyBirdScene(Ref *pSender) {
 
     Director::getInstance()->setDepthTest(true);
     mFpMainScene = FlappyBirdMainScene::createScene();
-    auto ss = TransitionFade::create(1, mFpMainScene);
+    auto ss = TransitionJumpZoom::create(1, mFpMainScene);
     Director::getInstance()->replaceScene(ss);
 
     CCLOG("%s : gotoFlappyBirdScene --", LOG_ATG);

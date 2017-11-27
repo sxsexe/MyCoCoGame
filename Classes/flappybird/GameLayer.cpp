@@ -37,11 +37,10 @@ bool GameLayer::init() {
     mFloor->setPosition(Point(origin.x, origin.y));
     this->addChild(mFloor);
     Size floorSize = mFloor->getContentSize();
+    auto moveTo1 = MoveTo::create(1, Vec2(-120, 0));
+    auto moveTo2 = MoveTo::create(1, Vec2(0, 0));
     mFloor->runAction(RepeatForever::create(
-            Sequence::create(
-                    MoveTo::create(0.5, Point(-120, 0)),
-                    MoveTo::create(0.5, Point(0, 0))
-            )
+            Sequence::createWithTwoActions(moveTo1, moveTo2)
     ));
 
     // FIXME 放在这里为调试，应该是startPlay之后开始绘制柱子
