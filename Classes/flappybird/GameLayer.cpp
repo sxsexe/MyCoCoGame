@@ -43,10 +43,6 @@ bool GameLayer::init() {
             Sequence::createWithTwoActions(moveTo1, moveTo2)
     ));
 
-    // FIXME 放在这里为调试，应该是startPlay之后开始绘制柱子
-    initColumn1();
-    initColumn2();
-
     //创建一个单点触摸监听
     auto listener = EventListenerTouchOneByOne::create();
     //设置下传触摸
@@ -96,8 +92,12 @@ Sprite *GameLayer::initBird() {
 
 void GameLayer::initColumn1() {
     Size visibleSize = Director::getInstance()->getVisibleSize();
-//    CCLOG("%s, visibleSize.width=%.2f, visibleSize.height=%.2f", LOG_TAG, visibleSize.width,
-//          visibleSize.height);
+    Size winSize = Director::getInstance()->getWinSize();
+    Vec2 origin = Director::getInstance()->getVisibleOrigin();
+    CCLOG("%s, visibleSize.width=%.2f, visibleSize.height=%.2f, "
+                  "winSize.width=%.2f, winSize.height=%.2f,"
+                  "origin.x=%.2f, origin.y=%.2f",
+          LOG_TAG, visibleSize.width, visibleSize.height,winSize.width,winSize.height, origin.x, origin.y);
     //获取背景尺寸大小
     Size backSize = mBackground->getContentSize();
 //    CCLOG("%s, backSize.width=%.2f, backSize.height=%.2f", LOG_TAG, backSize.width,
@@ -118,7 +118,8 @@ void GameLayer::initColumn1() {
                                          sSize.height - capInset * 2));
     mColumnUnder1->setAnchorPoint(Point(0, 0));
     mColumnUnder1->setContentSize(Size(COLUMN_WIDTH, height1));
-    mColumnUnder1->setPosition(Point(visibleSize.width, floorSize.height));
+    mColumnUnder1->setColor(Color3B(128, 0, 0));
+    mColumnUnder1->setPosition(Point(origin.x + visibleSize.width, floorSize.height));
 
     int height2 = (int) (visibleSize.height - floorSize.height - height1 - COLUMN_GAP);
     Sprite *columnNode2 = Sprite::create("fp/column2.png");
@@ -130,7 +131,7 @@ void GameLayer::initColumn1() {
                                              sSize.height - capInset * 2));
     mColumnOn1->setAnchorPoint(Point(0, 0));
     mColumnOn1->setContentSize(Size(Size(COLUMN_WIDTH, height2)));
-    mColumnOn1->setPosition(Point(visibleSize.width, floorSize.height + height1 + COLUMN_GAP));
+    mColumnOn1->setPosition(Point(origin.x + visibleSize.width, floorSize.height + height1 + COLUMN_GAP));
 
     this->addChild(mColumnUnder1, 0);
     this->addChild(mColumnOn1, 0);
@@ -193,9 +194,63 @@ int GameLayer::randomColumn(int min, int max) {
 
 bool GameLayer::onTouchBegan(Touch *touch, Event *event) {
     Point birdPosition = mBird->getPosition();
-
     CCLOG("%s, %s", LOG_TAG, __FUNCTION__);
+
+    if(mReadyFlag) {
+        startGame();
+        mReadyFlag = false;
+    }
 
     return true;
 
+}
+
+void GameLayer::startGame() {
+
+    if(!mRunFlag) {
+        // start game
+        mRunFlag = true;
+        initColumn1();
+        initColumn2();
+
+        birdFly();
+
+        //设置定时回调指定方法干活
+        auto scheduler = Director::getInstance()->getScheduler();
+        scheduler->schedule(schedule_selector(GameLayer::updateColumn), this, 0.05, false);
+
+    } else {
+        // already started
+        CCLOG("%s, has already started", LOG_TAG);
+    }
+
+}
+
+void GameLayer::birdFly() {
+    Vec2 birdPosition = mBird->getPosition();
+    Size floorSize = mFloor->getContentSize();
+    float time = (birdPosition.y-240)/135;
+    mBird->runAction(Sequence::create(MoveTo::create(1, Point(birdPosition.x, floorSize.height+40)), NULL));
+}
+
+void GameLayer::updateColumn(float delta) {
+
+    Vec2 origin = Director::getInstance()->getVisibleOrigin();
+    Vec2 columnPosition1 = mColumnUnder1->getPosition();
+    Vec2 columnPosition2 = mColumnUnder2->getPosition();
+    Size columnSize = mColumnUnder1->getContentSize();
+
+//    CCLOG("%s, columnPos.x=%f, columnPos.x=%f", LOG_TAG, columnPosition1.x, columnPosition2.y);
+
+    if(columnPosition1.x <= origin.x - columnSize.width) {
+        removeChild(mColumnUnder1);
+        removeChild(mColumnOn1);
+        initColumn1();
+    }
+
+    if(columnPosition2.x < origin.x - columnSize.width) {
+        removeChild(mColumnUnder2);
+        removeChild(mColumnOn2);
+        initColumn2();
+    }
 }

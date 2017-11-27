@@ -31,11 +31,17 @@ public:
 
 
 private:
+    bool mRunFlag = false;
+    bool mReadyFlag = true;//FIXME
+
     Sprite* initBird();
     Sprite* initFloor();
-
     void initColumn1();
     void initColumn2();
+
+    void startGame();
+    void birdFly();
+    void updateColumn(float delta);
 
     int random();
     int randomColumn(int min = COLUMN_MIN_H, int max = COLUMN_MAX_H);
@@ -48,7 +54,7 @@ private:
     static const int COLUMN_MIN_H = 60;
     static const int COLUMN_MAX_H = 200;
     const int COLUMN_SPACING = 120;
-    const float COLUMN_SPEED = 0.8;
+    const float COLUMN_SPEED = 1.8;
 
 public:
     // 初始化GameLayer
