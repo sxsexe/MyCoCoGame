@@ -3,6 +3,7 @@
 //
 
 #include "GameLayer.h"
+#include "../collision.h"
 
 #define LOG_TAG "FlappyBirdGameLayer_TAG"
 
@@ -19,7 +20,8 @@ bool GameLayer::init() {
     // 添加精灵
     mBackground = Sprite::create("fp/vp.jpg");
     mBackground->setAnchorPoint(Point(0, 0));
-    mBackground->setPosition(Point(origin.x, origin.y + visibleSize.height - mBackground->getContentSize().height));
+    mBackground->setPosition(
+            Point(origin.x, origin.y + visibleSize.height - mBackground->getContentSize().height));
     this->addChild(mBackground, 0);
     CCLOG("%s, bg.w=%f, bg.h=%f", LOG_TAG, mBackground->getContentSize().width,
           mBackground->getContentSize().height);
@@ -27,7 +29,8 @@ bool GameLayer::init() {
     mBird = initBird();
     Size backgroundSize = mBackground->getContentSize();
     //添加小鸟精灵，并播放动画
-    mBird->setPosition(Point(140 + origin.x, origin.y + backgroundSize.height / 3));
+    mBird->setPosition(
+            Point(origin.x + visibleSize.width / 2, origin.y + backgroundSize.height * 4 / 5));
     this->addChild(mBird, 0);
     mBird->runAction(RepeatForever::create(animAc));
 
@@ -97,7 +100,8 @@ void GameLayer::initColumn1() {
     CCLOG("%s, visibleSize.width=%.2f, visibleSize.height=%.2f, "
                   "winSize.width=%.2f, winSize.height=%.2f,"
                   "origin.x=%.2f, origin.y=%.2f",
-          LOG_TAG, visibleSize.width, visibleSize.height,winSize.width,winSize.height, origin.x, origin.y);
+          LOG_TAG, visibleSize.width, visibleSize.height, winSize.width, winSize.height, origin.x,
+          origin.y);
     //获取背景尺寸大小
     Size backSize = mBackground->getContentSize();
 //    CCLOG("%s, backSize.width=%.2f, backSize.height=%.2f", LOG_TAG, backSize.width,
@@ -131,7 +135,8 @@ void GameLayer::initColumn1() {
                                              sSize.height - capInset * 2));
     mColumnOn1->setAnchorPoint(Point(0, 0));
     mColumnOn1->setContentSize(Size(Size(COLUMN_WIDTH, height2)));
-    mColumnOn1->setPosition(Point(origin.x + visibleSize.width, floorSize.height + height1 + COLUMN_GAP));
+    mColumnOn1->setPosition(
+            Point(origin.x + visibleSize.width, floorSize.height + height1 + COLUMN_GAP));
 
     this->addChild(mColumnUnder1, 0);
     this->addChild(mColumnOn1, 0);
@@ -171,7 +176,8 @@ void GameLayer::initColumn2() {
                                              sSize.height - capInset * 2));
     mColumnOn2->setAnchorPoint(Point(0, 0));
     mColumnOn2->setContentSize(Size(Size(COLUMN_WIDTH, height2)));
-    mColumnOn2->setPosition(Point(columnUnder1Size.x + COLUMN_SPACING, floorSize.height + height1 + COLUMN_GAP));
+    mColumnOn2->setPosition(
+            Point(columnUnder1Size.x + COLUMN_SPACING, floorSize.height + height1 + COLUMN_GAP));
 
     this->addChild(mColumnUnder2, 0);
     this->addChild(mColumnOn2, 0);
@@ -187,7 +193,7 @@ int GameLayer::random() {
 
 int GameLayer::randomColumn(int min, int max) {
     std::random_device rd;
-    int number =  rd() % (max - min + 1) + min;
+    int number = rd() % (max - min + 1) + min;
     CCLOG("%s, randomColumn = %d", LOG_TAG, number);
     return number;
 }
@@ -196,7 +202,7 @@ bool GameLayer::onTouchBegan(Touch *touch, Event *event) {
     Point birdPosition = mBird->getPosition();
     CCLOG("%s, %s", LOG_TAG, __FUNCTION__);
 
-    if(mReadyFlag) {
+    if (mReadyFlag) {
         startGame();
         mReadyFlag = false;
     }
@@ -207,17 +213,18 @@ bool GameLayer::onTouchBegan(Touch *touch, Event *event) {
 
 void GameLayer::startGame() {
 
-    if(!mRunFlag) {
+    if (!mRunFlag) {
         // start game
         mRunFlag = true;
         initColumn1();
         initColumn2();
 
-        birdFly();
+        birdDrop();
 
         //设置定时回调指定方法干活
         auto scheduler = Director::getInstance()->getScheduler();
         scheduler->schedule(schedule_selector(GameLayer::updateColumn), this, 0.05, false);
+        scheduler->schedule(schedule_selector(GameLayer::updateBird), this, 0.05, false);
 
     } else {
         // already started
@@ -226,11 +233,13 @@ void GameLayer::startGame() {
 
 }
 
-void GameLayer::birdFly() {
+void GameLayer::birdDrop() {
     Vec2 birdPosition = mBird->getPosition();
     Size floorSize = mFloor->getContentSize();
-    float time = (birdPosition.y-240)/135;
-    mBird->runAction(Sequence::create(MoveTo::create(1, Point(birdPosition.x, floorSize.height+40)), NULL));
+    float time = (birdPosition.y) / 200;
+    auto createAction = MoveTo::create(time, Point(birdPosition.x, floorSize.height));
+    mBird->runAction(
+            Sequence::create(createAction, CallFunc::create(CC_CALLBACK_0(GameLayer::onAfterBirdDropped, this)), NULL));
 }
 
 void GameLayer::updateColumn(float delta) {
@@ -242,15 +251,43 @@ void GameLayer::updateColumn(float delta) {
 
 //    CCLOG("%s, columnPos.x=%f, columnPos.x=%f", LOG_TAG, columnPosition1.x, columnPosition2.y);
 
-    if(columnPosition1.x <= origin.x - columnSize.width) {
+    if (columnPosition1.x <= origin.x - columnSize.width) {
         removeChild(mColumnUnder1);
         removeChild(mColumnOn1);
         initColumn1();
     }
 
-    if(columnPosition2.x < origin.x - columnSize.width) {
+    if (columnPosition2.x < origin.x - columnSize.width) {
         removeChild(mColumnUnder2);
         removeChild(mColumnOn2);
         initColumn2();
     }
 }
+
+void GameLayer::updateBird(float delta) {
+    if (mRunFlag) {
+        birdDrop();
+    }
+
+    //获取小鸟当前位置
+    Vec2 birdPosition = mBird->getPosition();
+    //获取小鸟尺寸大小
+    Size birdSize = mBird->getContentSize();
+    //获取地面位置
+    Vec2 floorPos = mFloor->getPosition();
+    //获取地面尺寸大小
+    Size floorSize = mFloor->getContentSize();
+
+    bool checkFloor = collision(birdPosition.x, birdPosition.y, birdPosition.x + birdSize.width,
+                                birdPosition.y + birdSize.height,
+                                floorPos.x, floorPos.y, floorPos.x + floorSize.width,
+                                floorPos.y + floorSize.height
+    );
+    CCLOG("%s, checkFloor=%s", LOG_TAG, checkFloor ? "true" : "false" );
+}
+
+void GameLayer::onAfterBirdDropped() {
+    CCLOG("%s, onAfterBirdDropped", LOG_TAG);
+
+}
+

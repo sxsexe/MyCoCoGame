@@ -40,8 +40,10 @@ private:
     void initColumn2();
 
     void startGame();
-    void birdFly();
+    void birdDrop();
     void updateColumn(float delta);
+    void updateBird(float delta);
+    void onAfterBirdDropped();
 
     int random();
     int randomColumn(int min = COLUMN_MIN_H, int max = COLUMN_MAX_H);
