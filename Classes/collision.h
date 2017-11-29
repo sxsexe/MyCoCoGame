@@ -12,16 +12,16 @@
 static bool collision(double srcLTx, double srcLTy, double srcRBx, double srcRBy,
                       double targetLTx, double targetLTy, double targetRBx, double targetRBy) {
     if((srcLTx > targetRBx) || srcRBx < targetLTx) {
-        CCLOG("CollisionCheck 111 \n");
+//        CCLOG("CollisionCheck 111 \n");
         return false;
     } else {
         if(srcLTy > targetRBy || srcRBy < targetLTy) {
-            CCLOG("CollisionCheck 22 \n");
+//            CCLOG("CollisionCheck 22 \n");
             return false;
         }
     }
 
-    CCLOG("CollisionCheck 33 \n");
+//    CCLOG("CollisionCheck 33 \n");
 //    CCLOG("CollisionCheck srcLTx=%f, srcLTy=%f, srcRBx=%f, srcRBy=%f,"
 //                  "targetLTx=%f, targetLTy=%f, targetRBx=%f, targetRBy=%f",
 //          srcLTx, srcLTy, srcRBx, srcRBy, targetLTx, targetLTy, targetRBx, targetRBy);

@@ -17,7 +17,7 @@ public:
     // 小鸟精灵
     Sprite* mBird;
     // 动画动作数组
-    Animate* animAc;
+    Animate* mAnimAc;
 
     // 背景精灵
     Sprite* mBackground;
@@ -44,6 +44,9 @@ private:
     void updateColumn(float delta);
     void updateBird(float delta);
     void onAfterBirdDropped();
+    void setRunFlag1();
+    void setRunFlag2();
+    void gameOver();
 
     int random();
     int randomColumn(int min = COLUMN_MIN_H, int max = COLUMN_MAX_H);
@@ -57,6 +60,7 @@ private:
     static const int COLUMN_MAX_H = 200;
     const int COLUMN_SPACING = 120;
     const float COLUMN_SPEED = 1.8;
+    const int BIRD_FLY_SPEED = 108;
 
 public:
     // 初始化GameLayer

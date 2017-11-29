@@ -32,7 +32,7 @@ bool GameLayer::init() {
     mBird->setPosition(
             Point(origin.x + visibleSize.width / 2, origin.y + backgroundSize.height * 4 / 5));
     this->addChild(mBird, 0);
-    mBird->runAction(RepeatForever::create(animAc));
+    mBird->runAction(RepeatForever::create(mAnimAc));
 
     // 添加地板
     mFloor = initFloor();
@@ -86,9 +86,9 @@ Sprite *GameLayer::initBird() {
     //创建动画对象，从帧向量产生动画，间隔为0.1秒
     Animation *anim = Animation::createWithSpriteFrames(animFrames, 0.1f);
     //创建动画动作对象
-    animAc = Animate::create(anim);
+    mAnimAc = Animate::create(anim);
     //因为暂时不用，保持引用，防止被自动释放
-    animAc->retain();
+    mAnimAc->retain();
 
     return bird;
 }
@@ -207,6 +207,23 @@ bool GameLayer::onTouchBegan(Touch *touch, Event *event) {
         mReadyFlag = false;
     }
 
+    if(mRunFlag) {
+        auto action = Spawn::createWithTwoActions(
+                MoveTo::create(0.2, Vec2(birdPosition.x, birdPosition.y + BIRD_FLY_SPEED)),
+                RotateTo::create(0, -30));
+        mBird->stopAllActions();
+        mBird->runAction(RepeatForever::create(mAnimAc));
+        mBird->runAction(
+                Sequence::create(
+                        CallFunc::create(CC_CALLBACK_0(GameLayer::setRunFlag1, this)),
+                        action,
+                        DelayTime::create(0.05 ),
+                        CallFunc::create(CC_CALLBACK_0(GameLayer::setRunFlag2, this)),
+                        RotateTo::create(2.0, 90),
+                        NULL
+                ));
+    }
+
     return true;
 
 }
@@ -236,10 +253,12 @@ void GameLayer::startGame() {
 void GameLayer::birdDrop() {
     Vec2 birdPosition = mBird->getPosition();
     Size floorSize = mFloor->getContentSize();
-    float time = (birdPosition.y) / 200;
+    float time = 10;
     auto createAction = MoveTo::create(time, Point(birdPosition.x, floorSize.height));
     mBird->runAction(
-            Sequence::create(createAction, CallFunc::create(CC_CALLBACK_0(GameLayer::onAfterBirdDropped, this)), NULL));
+            Sequence::create(createAction,
+                             CallFunc::create(CC_CALLBACK_0(GameLayer::onAfterBirdDropped, this)),
+                             NULL));
 }
 
 void GameLayer::updateColumn(float delta) {
@@ -283,11 +302,43 @@ void GameLayer::updateBird(float delta) {
                                 floorPos.x, floorPos.y, floorPos.x + floorSize.width,
                                 floorPos.y + floorSize.height
     );
-    CCLOG("%s, checkFloor=%s", LOG_TAG, checkFloor ? "true" : "false" );
+    CCLOG("%s, checkFloor=%s", LOG_TAG, checkFloor ? "true" : "false");
+
+    if (checkFloor) {
+        gameOver();
+    }
 }
 
 void GameLayer::onAfterBirdDropped() {
-    CCLOG("%s, onAfterBirdDropped", LOG_TAG);
+    //CCLOG("%s, onAfterBirdDropped", LOG_TAG);
+
+}
+
+void GameLayer::gameOver() {
+    CCLOG("%s, gameOver 11", LOG_TAG);
+    mRunFlag = false;
+    mReadyFlag = true;
+    Point birdPosition = mBird->getPosition();
+    Size birdSize = mBird->getContentSize();
+    Size floorSize = mFloor->getContentSize();
+
+    mFloor->stopAllActions();
+    mColumnOn1->stopAllActions();
+    mColumnUnder1->stopAllActions();
+    mColumnUnder2->stopAllActions();
+    mColumnOn2->stopAllActions();
+    mBird->stopAllActions();
+    mBird->runAction(Sequence::create(Spawn::createWithTwoActions(
+            MoveTo::create(0.2, Point(birdPosition.x, floorSize.height + birdSize.width / 2)),
+            RotateTo::create(0.2, 90)), NULL));
+
+    CCLOG("%s, gameOver 22", LOG_TAG);
+}
+
+void GameLayer::setRunFlag1() {
+
+}
+void GameLayer::setRunFlag2() {
 
 }
 
