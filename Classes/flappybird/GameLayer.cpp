@@ -11,10 +11,18 @@ bool GameLayer::init() {
     if (!Layer::init()) {
         return false;
     }
+    this->setKeyboardEnabled(true);
 
     switchState(GAME_PREPARE);
 
     return true;
+}
+
+void GameLayer::onKeyReleased(EventKeyboard::KeyCode keyCode, Event *event) {
+    CCLOG("%s onKeyReleased", LOG_TAG);
+    if(keyCode == EventKeyboard::KeyCode::KEY_BACKSPACE){
+        CCLOG("%s KEY_BACKSPACE", LOG_TAG);
+    }
 }
 
 void GameLayer::initTouchListener() {
@@ -29,6 +37,10 @@ void GameLayer::initTouchListener() {
 }
 
 void GameLayer::initFloor() {
+    if(mFloor != NULL) {
+        CCLOG("mFloor has been inited");
+        return;
+    }
     Size visibleSize = Director::getInstance()->getVisibleSize();
     //获取可见区域原点坐标
     Point origin = Director::getInstance()->getVisibleOrigin();
@@ -51,7 +63,15 @@ void GameLayer::initFloor() {
     ));
 }
 
+void GameLayer::initGameOverSprite() {
+
+}
+
 void GameLayer::initPrepareSprite() {
+    if(mPreparedBird != NULL) {
+        CCLOG("mPreparedBird has been inited");
+        return;
+    }
     Size visibleSize = Director::getInstance()->getVisibleSize();
     Point origin = Director::getInstance()->getVisibleOrigin();
     mPreparedBird = Sprite::create("fp/readyBird.png");
@@ -62,6 +82,10 @@ void GameLayer::initPrepareSprite() {
 }
 
 void GameLayer::initBackground() {
+    if(mBackground != NULL) {
+        CCLOG("mBackground has been inited");
+        return;
+    }
     //获取可见区域尺寸
     Size visibleSize = Director::getInstance()->getVisibleSize();
     //获取可见区域原点坐标
@@ -82,6 +106,10 @@ void GameLayer::initBackground() {
 }
 
 void GameLayer::initBird() {
+    if(mBird != NULL) {
+        CCLOG("mBird has been inited");
+        return;
+    }
     mBird = Sprite::create();
 
     SpriteFrameCache *sfc = SpriteFrameCache::getInstance();
@@ -121,7 +149,7 @@ void GameLayer::initColumn1() {
     Size visibleSize = Director::getInstance()->getVisibleSize();
     Size winSize = Director::getInstance()->getWinSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
-    CCLOG("%s, visibleSize.width=%.2f, visibleSize.height=%.2f, "
+    CCLOG("%s, initColumn1 visibleSize.width=%.2f, visibleSize.height=%.2f, "
                   "winSize.width=%.2f, winSize.height=%.2f,"
                   "origin.x=%.2f, origin.y=%.2f",
           LOG_TAG, visibleSize.width, visibleSize.height, winSize.width, winSize.height, origin.x,
@@ -334,7 +362,7 @@ void GameLayer::updateBird(float delta) {
     CCLOG("%s, checkFloor=%s", LOG_TAG, checkFloor ? "true" : "false");
 
     if (checkFloor) {
-        gameOver();
+        switchState(GAME_OVER);
     }
 }
 
@@ -343,8 +371,8 @@ void GameLayer::onAfterBirdDropped() {
 
 }
 
-void GameLayer::gameOver() {
-    CCLOG("%s, gameOver 11", LOG_TAG);
+void GameLayer::onGameOver() {
+    CCLOG("%s, onGameOver 11", LOG_TAG);
     mRunFlag = false;
     mReadyFlag = true;
     Point birdPosition = mBird->getPosition();
@@ -361,7 +389,7 @@ void GameLayer::gameOver() {
             MoveTo::create(0.2, Point(birdPosition.x, floorSize.height + birdSize.width / 2)),
             RotateTo::create(0.2, 90)), NULL));
 
-    CCLOG("%s, gameOver 22", LOG_TAG);
+    CCLOG("%s, onGameOver 22", LOG_TAG);
 }
 
 void GameLayer::setRunFlag1() {
@@ -396,8 +424,10 @@ void GameLayer::onStateEnter(GameStateEnum newState) {
             startGame();
         }
             break;
-        case GAME_OVER:
-
+        case GAME_OVER: {
+            //显示Replay界面
+            initGameOverSprite();
+        }
             break;
         default:
             CCLOG("%s, should never run here", LOG_TAG);
@@ -414,11 +444,12 @@ void GameLayer::onStateExit(GameStateEnum state) {
         }
             break;
         case GAME_RUNNING: {
+            onGameOver();
+        }
+            break;
+        case GAME_OVER:{
 
         }
-
-            break;
-        case GAME_OVER:
 
             break;
         default:

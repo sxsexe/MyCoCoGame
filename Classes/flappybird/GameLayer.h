@@ -54,6 +54,8 @@ private:
 
     void initPrepareSprite();
 
+    void initGameOverSprite();
+
     void onStateEnter(GameStateEnum newState);
 
     void onStateExit(GameStateEnum state);
@@ -74,7 +76,7 @@ private:
 
     void setRunFlag2();
 
-    void gameOver();
+    void onGameOver();
 
     int random();
 
@@ -83,6 +85,8 @@ private:
     std::string getEnumString(GameStateEnum state);
 
     bool onTouchBegan(Touch *touch, Event *event);
+
+    virtual void onKeyReleased(EventKeyboard::KeyCode keyCode, Event* event);
 
 private:
     const int COLUMN_WIDTH = 24;
