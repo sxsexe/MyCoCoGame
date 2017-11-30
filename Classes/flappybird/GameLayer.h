@@ -11,47 +11,78 @@
 USING_NS_CC;
 using namespace ui;
 
-class GameLayer : public Layer
-{
+enum GameStateEnum {
+    GAME_PREPARE = 1, GAME_RUNNING, GAME_OVER
+};
+
+
+class GameLayer : public Layer {
 public:
     // 小鸟精灵
-    Sprite* mBird;
+    Sprite *mBird;
     // 动画动作数组
-    Animate* mAnimAc;
+    Animate *mAnimAc;
+    Sprite *mPreparedBird;
 
     // 背景精灵
-    Sprite* mBackground;
+    Sprite *mBackground;
     // floor精灵
-    Sprite* mFloor;
+    Sprite *mFloor;
     // 柱子精灵
-    Scale9Sprite* mColumnUnder1;
-    Scale9Sprite* mColumnUnder2;
-    Scale9Sprite* mColumnOn1;
-    Scale9Sprite* mColumnOn2;
+    Scale9Sprite *mColumnUnder1;
+    Scale9Sprite *mColumnUnder2;
+    Scale9Sprite *mColumnOn1;
+    Scale9Sprite *mColumnOn2;
 
-
-private:
     bool mRunFlag = false;
     bool mReadyFlag = true;//FIXME
+    GameStateEnum mCurrentState;
 
-    Sprite* initBird();
-    Sprite* initFloor();
+private:
+
+    void initTouchListener();
+
+    void initBackground();
+
+    void initBird();
+
+    void initFloor();
+
     void initColumn1();
+
     void initColumn2();
 
+    void initPrepareSprite();
+
+    void onStateEnter(GameStateEnum newState);
+
+    void onStateExit(GameStateEnum state);
+
+    void switchState(GameStateEnum newState);
+
     void startGame();
+
     void birdDrop();
+
     void updateColumn(float delta);
+
     void updateBird(float delta);
+
     void onAfterBirdDropped();
+
     void setRunFlag1();
+
     void setRunFlag2();
+
     void gameOver();
 
     int random();
+
     int randomColumn(int min = COLUMN_MIN_H, int max = COLUMN_MAX_H);
 
-    bool onTouchBegan(Touch* touch, Event* event);
+    std::string getEnumString(GameStateEnum state);
+
+    bool onTouchBegan(Touch *touch, Event *event);
 
 private:
     const int COLUMN_WIDTH = 24;
@@ -59,7 +90,7 @@ private:
     static const int COLUMN_MIN_H = 60;
     static const int COLUMN_MAX_H = 200;
     const int COLUMN_SPACING = 120;
-    const float COLUMN_SPEED = 1.8;
+    const float COLUMN_SPEED = 1.0;
     const int BIRD_FLY_SPEED = 108;
 
 public:

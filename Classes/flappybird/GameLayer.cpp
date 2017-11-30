@@ -12,40 +12,12 @@ bool GameLayer::init() {
         return false;
     }
 
-    //获取可见区域尺寸
-    Size visibleSize = Director::getInstance()->getVisibleSize();
-    //获取可见区域原点坐标
-    Point origin = Director::getInstance()->getVisibleOrigin();
+    switchState(GAME_PREPARE);
 
-    // 添加精灵
-    mBackground = Sprite::create("fp/vp.jpg");
-    mBackground->setAnchorPoint(Point(0, 0));
-    mBackground->setPosition(
-            Point(origin.x, origin.y + visibleSize.height - mBackground->getContentSize().height));
-    this->addChild(mBackground, 0);
-    CCLOG("%s, bg.w=%f, bg.h=%f", LOG_TAG, mBackground->getContentSize().width,
-          mBackground->getContentSize().height);
+    return true;
+}
 
-    mBird = initBird();
-    Size backgroundSize = mBackground->getContentSize();
-    //添加小鸟精灵，并播放动画
-    mBird->setPosition(
-            Point(origin.x + visibleSize.width / 2, origin.y + backgroundSize.height * 4 / 5));
-    this->addChild(mBird, 0);
-    mBird->runAction(RepeatForever::create(mAnimAc));
-
-    // 添加地板
-    mFloor = initFloor();
-    mFloor->setAnchorPoint(Point(0, 0));
-    mFloor->setPosition(Point(origin.x, origin.y));
-    this->addChild(mFloor);
-    Size floorSize = mFloor->getContentSize();
-    auto moveTo1 = MoveTo::create(1, Vec2(-120, 0));
-    auto moveTo2 = MoveTo::create(1, Vec2(0, 0));
-    mFloor->runAction(RepeatForever::create(
-            Sequence::createWithTwoActions(moveTo1, moveTo2)
-    ));
-
+void GameLayer::initTouchListener() {
     //创建一个单点触摸监听
     auto listener = EventListenerTouchOneByOne::create();
     //设置下传触摸
@@ -54,18 +26,63 @@ bool GameLayer::init() {
     listener->onTouchBegan = CC_CALLBACK_2(GameLayer::onTouchBegan, this);
     //添加到监听器
     _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
-
-    CCLOG("%s, init", LOG_TAG);
-    return true;
 }
 
-Sprite *GameLayer::initFloor() {
-    Sprite *sprite = Sprite::create("fp/floor1.png");
-    return sprite;
+void GameLayer::initFloor() {
+    Size visibleSize = Director::getInstance()->getVisibleSize();
+    //获取可见区域原点坐标
+    Point origin = Director::getInstance()->getVisibleOrigin();
+    mFloor = Sprite::create("fp/floor1.png");
+//    mFloor->setContentSize(Size(visibleSize.width * 4, mFloor->getContentSize().height));
+    mFloor->setAnchorPoint(Point(0, 0));
+
+    CCLOG("%s, initFloor visibleSize.width=%.2f, visibleSize.height=%.2f, "
+                  "origin.x =%.2f, origin.y = %.2f, mFloor.width=%.2f, mFloor.height=%.2f",
+          LOG_TAG, visibleSize.width, visibleSize.height,
+          origin.x, origin.y, mFloor->getContentSize().width, mFloor->getContentSize().height);
+
+    mFloor->setPosition(Point(origin.x, origin.y));
+    this->addChild(mFloor);
+    Size floorSize = mFloor->getContentSize();
+    auto moveTo1 = MoveTo::create(1, Vec2(-120, 0));
+    auto moveTo2 = MoveTo::create(1, Vec2(0, 0));
+    mFloor->runAction(RepeatForever::create(
+            Sequence::createWithTwoActions(moveTo1, moveTo2)
+    ));
 }
 
-Sprite *GameLayer::initBird() {
-    Sprite *bird = Sprite::create();
+void GameLayer::initPrepareSprite() {
+    Size visibleSize = Director::getInstance()->getVisibleSize();
+    Point origin = Director::getInstance()->getVisibleOrigin();
+    mPreparedBird = Sprite::create("fp/readyBird.png");
+//    mPreparedBird->setAnchorPoint(Point(0, 0));
+    mPreparedBird->setPosition(
+            Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2));
+    this->addChild(mPreparedBird);
+}
+
+void GameLayer::initBackground() {
+    //获取可见区域尺寸
+    Size visibleSize = Director::getInstance()->getVisibleSize();
+    //获取可见区域原点坐标
+    Point origin = Director::getInstance()->getVisibleOrigin();
+
+    mBackground = Sprite::create("fp/vp.jpg");
+    mBackground->setAnchorPoint(Point(0, 0));
+
+    CCLOG("%s, initBackground visibleSize.width=%.2f, visibleSize.height=%.2f, "
+                  "origin.x =%.2f, origin.y = %.2f, mBackground.width=%.2f, mBackground.height=%.2f",
+          LOG_TAG, visibleSize.width, visibleSize.height,
+          origin.x, origin.y, mBackground->getContentSize().width,
+          mBackground->getContentSize().height);
+
+    mBackground->setPosition(
+            Point(origin.x, origin.y + visibleSize.height - mBackground->getContentSize().height));
+    this->addChild(mBackground, 0);
+}
+
+void GameLayer::initBird() {
+    mBird = Sprite::create();
 
     SpriteFrameCache *sfc = SpriteFrameCache::getInstance();
     sfc->addSpriteFramesWithFile("fp/bird.plist", "fp/birdP.png");
@@ -90,7 +107,14 @@ Sprite *GameLayer::initBird() {
     //因为暂时不用，保持引用，防止被自动释放
     mAnimAc->retain();
 
-    return bird;
+    Point origin = Director::getInstance()->getVisibleOrigin();
+    Size backgroundSize = mBackground->getContentSize();
+    Size visibleSize = Director::getInstance()->getVisibleSize();
+    //添加小鸟精灵，并播放动画
+    mBird->setPosition(
+            Point(origin.x + visibleSize.width / 2, origin.y + backgroundSize.height * 4 / 5));
+    this->addChild(mBird, 0);
+    mBird->runAction(RepeatForever::create(mAnimAc));
 }
 
 void GameLayer::initColumn1() {
@@ -198,16 +222,32 @@ int GameLayer::randomColumn(int min, int max) {
     return number;
 }
 
-bool GameLayer::onTouchBegan(Touch *touch, Event *event) {
-    Point birdPosition = mBird->getPosition();
-    CCLOG("%s, %s", LOG_TAG, __FUNCTION__);
+std::string GameLayer::getEnumString(GameStateEnum state) {
 
-    if (mReadyFlag) {
-        startGame();
-        mReadyFlag = false;
+    switch (state) {
+        case GAME_PREPARE:
+            return std::string("GAME_PREPARE");
+        case GAME_RUNNING:
+            return std::string("GAME_RUNNING");
+        case GAME_OVER:
+            return std::string("GAME_OVER");
+        default:
+            return std::string("UnKnown State");
     }
 
-    if(mRunFlag) {
+}
+
+bool GameLayer::onTouchBegan(Touch *touch, Event *event) {
+    CCLOG("%s, onTouchBegan", LOG_TAG);
+    if(mCurrentState == GAME_PREPARE) {
+
+        switchState(GAME_RUNNING);
+
+    } else if(mCurrentState == GAME_RUNNING) {
+        if(mBird == NULL) {
+            return true;
+        }
+        Point birdPosition = mBird->getPosition();
         auto action = Spawn::createWithTwoActions(
                 MoveTo::create(0.2, Vec2(birdPosition.x, birdPosition.y + BIRD_FLY_SPEED)),
                 RotateTo::create(0, -30));
@@ -217,11 +257,14 @@ bool GameLayer::onTouchBegan(Touch *touch, Event *event) {
                 Sequence::create(
                         CallFunc::create(CC_CALLBACK_0(GameLayer::setRunFlag1, this)),
                         action,
-                        DelayTime::create(0.05 ),
+                        DelayTime::create(0.05),
                         CallFunc::create(CC_CALLBACK_0(GameLayer::setRunFlag2, this)),
                         RotateTo::create(2.0, 90),
                         NULL
                 ));
+
+    }  else if(mCurrentState == GAME_OVER) {
+        // FIXME replay
     }
 
     return true;
@@ -229,25 +272,11 @@ bool GameLayer::onTouchBegan(Touch *touch, Event *event) {
 }
 
 void GameLayer::startGame() {
-
-    if (!mRunFlag) {
-        // start game
-        mRunFlag = true;
-        initColumn1();
-        initColumn2();
-
-        birdDrop();
-
-        //设置定时回调指定方法干活
-        auto scheduler = Director::getInstance()->getScheduler();
-        scheduler->schedule(schedule_selector(GameLayer::updateColumn), this, 0.05, false);
-        scheduler->schedule(schedule_selector(GameLayer::updateBird), this, 0.05, false);
-
-    } else {
-        // already started
-        CCLOG("%s, has already started", LOG_TAG);
-    }
-
+    birdDrop();
+    //设置定时回调指定方法干活
+    auto scheduler = Director::getInstance()->getScheduler();
+    scheduler->schedule(schedule_selector(GameLayer::updateColumn), this, 0.05, false);
+    scheduler->schedule(schedule_selector(GameLayer::updateBird), this, 0.05, false);
 }
 
 void GameLayer::birdDrop() {
@@ -338,7 +367,72 @@ void GameLayer::gameOver() {
 void GameLayer::setRunFlag1() {
 
 }
+
 void GameLayer::setRunFlag2() {
 
 }
+
+void GameLayer::onStateEnter(GameStateEnum newState) {
+    CCLOG("%s, onStateEnter newState=%s, currentState=%s", LOG_TAG, getEnumString(newState).c_str(),
+          getEnumString(mCurrentState).c_str());
+    if (newState == mCurrentState) {
+        // ignore
+        CCLOG("%s, onStateEnter same state, Ignore!!!", LOG_TAG);
+        return;
+    }
+    mCurrentState = newState;
+    switch (newState) {
+        case GAME_PREPARE: {
+            initBackground();
+            initFloor();
+            initPrepareSprite();
+            initTouchListener();
+        }
+            break;
+        case GAME_RUNNING: {
+            initBird();
+            initColumn1();
+            initColumn2();
+            startGame();
+        }
+            break;
+        case GAME_OVER:
+
+            break;
+        default:
+            CCLOG("%s, should never run here", LOG_TAG);
+            break;
+    }
+}
+
+
+void GameLayer::onStateExit(GameStateEnum state) {
+    CCLOG("%s, onStateExit state=%s", LOG_TAG, getEnumString(state).c_str());
+    switch (state) {
+        case GAME_PREPARE: {
+            removeChild(mPreparedBird, true);
+        }
+            break;
+        case GAME_RUNNING: {
+
+        }
+
+            break;
+        case GAME_OVER:
+
+            break;
+        default:
+            break;
+    }
+}
+
+void GameLayer::switchState(GameStateEnum newState) {
+    GameStateEnum lastState = mCurrentState;
+    onStateExit(lastState);
+    onStateEnter(newState);
+
+}
+
+
+
 
