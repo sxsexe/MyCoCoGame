@@ -141,7 +141,7 @@ void GameLayer::initBird() {
     //添加小鸟精灵，并播放动画
     mBird->setPosition(
             Point(origin.x + visibleSize.width / 2, origin.y + backgroundSize.height * 4 / 5));
-    this->addChild(mBird, 0);
+    this->addChild(mBird, 10);
     mBird->runAction(RepeatForever::create(mAnimAc));
 }
 
@@ -341,7 +341,7 @@ void GameLayer::updateColumn(float delta) {
 }
 
 void GameLayer::updateBird(float delta) {
-    if (mRunFlag) {
+    if (mCurrentState == GAME_RUNNING) {
         birdDrop();
     }
 
@@ -359,7 +359,7 @@ void GameLayer::updateBird(float delta) {
                                 floorPos.x, floorPos.y, floorPos.x + floorSize.width,
                                 floorPos.y + floorSize.height
     );
-    CCLOG("%s, checkFloor=%s", LOG_TAG, checkFloor ? "true" : "false");
+//    CCLOG("%s, checkFloor=%s", LOG_TAG, checkFloor ? "true" : "false");
 
     if (checkFloor) {
         switchState(GAME_OVER);

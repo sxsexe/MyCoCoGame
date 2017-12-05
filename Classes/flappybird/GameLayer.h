@@ -95,7 +95,7 @@ private:
     static const int COLUMN_MAX_H = 200;
     const int COLUMN_SPACING = 120;
     const float COLUMN_SPEED = 1.0;
-    const int BIRD_FLY_SPEED = 108;
+    const int BIRD_FLY_SPEED = 80;
 
 public:
     // 初始化GameLayer
