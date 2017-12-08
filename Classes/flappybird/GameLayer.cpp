@@ -55,7 +55,6 @@ void GameLayer::initFloor() {
 
     mFloor->setPosition(Point(origin.x, origin.y));
     this->addChild(mFloor);
-    Size floorSize = mFloor->getContentSize();
     auto moveTo1 = MoveTo::create(1, Vec2(-120, 0));
     auto moveTo2 = MoveTo::create(1, Vec2(0, 0));
     mFloor->runAction(RepeatForever::create(
@@ -247,6 +246,10 @@ int GameLayer::randomColumn(int min, int max) {
     std::random_device rd;
     int number = rd() % (max - min + 1) + min;
     CCLOG("%s, randomColumn = %d", LOG_TAG, number);
+
+    //FIXME debug
+    number = 50;
+
     return number;
 }
 
@@ -266,7 +269,7 @@ std::string GameLayer::getEnumString(GameStateEnum state) {
 }
 
 bool GameLayer::onTouchBegan(Touch *touch, Event *event) {
-    CCLOG("%s, onTouchBegan", LOG_TAG);
+//    CCLOG("%s, onTouchBegan", LOG_TAG);
     if(mCurrentState == GAME_PREPARE) {
 
         switchState(GAME_RUNNING);
@@ -341,29 +344,86 @@ void GameLayer::updateColumn(float delta) {
 }
 
 void GameLayer::updateBird(float delta) {
+    if(mCurrentState == GAME_OVER || mCurrentState == GAME_PREPARE) {
+        return;
+    }
+
     if (mCurrentState == GAME_RUNNING) {
         birdDrop();
     }
 
-    //获取小鸟当前位置
     Vec2 birdPosition = mBird->getPosition();
-    //获取小鸟尺寸大小
     Size birdSize = mBird->getContentSize();
-    //获取地面位置
+
     Vec2 floorPos = mFloor->getPosition();
-    //获取地面尺寸大小
     Size floorSize = mFloor->getContentSize();
+
+    Vec2 columnUnder1Pos = mColumnUnder1->getPosition();
+    Size columnUnder1Size = mColumnUnder1->getContentSize();
+
+    Vec2 columnUnder2Pos = mColumnUnder2->getPosition();
+    Size columnUnder2Size= mColumnUnder2->getContentSize();
+
+    Vec2 columnOn1Pos = mColumnOn1->getPosition();
+    Size columnOn1Size = mColumnOn1->getContentSize();
+
+    Vec2 columnOn2Pos = mColumnOn2->getPosition();
+    Size columnOn2Size = mColumnOn2->getContentSize();
 
     bool checkFloor = collision(birdPosition.x, birdPosition.y, birdPosition.x + birdSize.width,
                                 birdPosition.y + birdSize.height,
                                 floorPos.x, floorPos.y, floorPos.x + floorSize.width,
-                                floorPos.y + floorSize.height
-    );
-//    CCLOG("%s, checkFloor=%s", LOG_TAG, checkFloor ? "true" : "false");
+                                floorPos.y + floorSize.height);
 
-    if (checkFloor) {
+    bool checkColumnUnder1 = collision(birdPosition.x, birdPosition.y, birdPosition.x + birdSize.width,
+                                       birdPosition.y + birdSize.height,
+                                       columnUnder1Pos.x, columnUnder1Pos.y, columnUnder1Pos.x + columnUnder1Size.width,
+                                       columnUnder1Pos.y + columnUnder1Size.height);
+
+    bool checkColumnUnder2 = collision(birdPosition.x, birdPosition.y, birdPosition.x + birdSize.width,
+                                       birdPosition.y + birdSize.height,
+                                       columnUnder2Pos.x, columnUnder2Pos.y, columnUnder2Pos.x + columnUnder2Size.width,
+                                       columnUnder2Pos.y + columnUnder2Size.height);
+
+    bool checkColumnOn1 = collision(birdPosition.x, birdPosition.y, birdPosition.x + birdSize.width,
+                                    birdPosition.y + birdSize.height,
+                                    columnOn1Pos.x, columnOn1Pos.y, columnOn1Pos.x + columnOn1Size.width,
+                                    columnOn1Pos.y + columnOn1Size.height);
+
+    bool checkColumnOn2 = collision(birdPosition.x, birdPosition.y, birdPosition.x + birdSize.width,
+                                    birdPosition.y + birdSize.height,
+                                    columnOn2Pos.x, columnOn2Pos.y, columnOn2Pos.x + columnOn2Size.width,
+                                    columnOn2Pos.y + columnOn2Size.height);
+
+//    CCLOG("%s, checkFloor=%s", LOG_TAG, checkFloor ? "true" : "false");
+//    if(checkColumnUnder1) {
+//        CCLOG("%s, ======checkColumnUnder1=====", LOG_TAG);
+//        switchState(GAME_OVER);
+//        return;
+//    }
+
+//    if(checkColumnUnder2) {
+//        CCLOG("%s, ======checkColumnUnder2=====", LOG_TAG);
+//        switchState(GAME_OVER);
+//        return;
+//    }
+
+    if(checkColumnOn1) {
+        CCLOG("%s, ======checkColumnOn1=====", LOG_TAG);
         switchState(GAME_OVER);
+        return;
     }
+
+//    if(checkColumnOn2) {
+//        CCLOG("%s, ======checkColumnOn2=====", LOG_TAG);
+//        switchState(GAME_OVER);
+//        return;
+//    }
+//
+//    if (checkFloor) {
+//        switchState(GAME_OVER);
+//        return;
+//    }
 }
 
 void GameLayer::onAfterBirdDropped() {
@@ -379,6 +439,7 @@ void GameLayer::onGameOver() {
     Size birdSize = mBird->getContentSize();
     Size floorSize = mFloor->getContentSize();
 
+//    Director::getInstance()->getScheduler()->pauseAllTargets();
     mFloor->stopAllActions();
     mColumnOn1->stopAllActions();
     mColumnUnder1->stopAllActions();
